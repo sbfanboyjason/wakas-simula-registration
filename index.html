@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SB19 "Wakas at Simula" Trilogy Finale — Registration</title>
+<link rel="icon" type="image/png" href="assets/favicon.png" />
+<link rel="icon" href="assets/favicon.ico" sizes="any" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="assets/styles.css" />
 <link rel="stylesheet" href="shared/credit-footer.css" />
 </head>
@@ -69,8 +72,15 @@
 
     <form id="registrationForm" novalidate>
 
-      <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true"><label for="website">Leave this field blank</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off" /></div>
-         <!-- Personal info -->
+      <!-- Honeypot — invisible to real visitors, left alone by them; bots that
+           blindly fill every field tend to fill this too, so a non-empty value
+           here signals spam. Not a real field, do not remove. -->
+      <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+        <label for="website">Leave this field blank</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <!-- Personal info -->
       <div class="card">
         <h2>Registrant Information</h2>
 
@@ -173,6 +183,53 @@
 <div id="qrLightbox" class="qr-lightbox" hidden>
   <img id="qrLightboxImg" src="assets/gcash-qr.jpg" alt="GCash QR code (enlarged) for payment" />
   <button type="button" id="qrLightboxClose" class="qr-lightbox-close" aria-label="Close">&times;</button>
+</div>
+
+<!-- Pre-submit review — shown after "Submit Registration" so the registrant
+     can double-check the details entry depends on before anything is sent. -->
+<div id="confirmModal" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <h2>Please Confirm Your Details</h2>
+    <p class="modal-intro">Take a moment to review the information below — it's exactly what we'll use to
+    verify your registration and let you in at the venue, so it needs to be accurate.</p>
+
+    <div class="confirm-section">
+      <div class="confirm-label">Full Legal Name</div>
+      <div class="confirm-value" id="confirmFullName"></div>
+      <div class="confirm-note">Must exactly match the valid ID you'll bring to the venue — this is how
+      we verify you at entry, so a misspelled or shortened name can cause problems at the door.</div>
+    </div>
+
+    <div class="confirm-section">
+      <div class="confirm-label">Email Address</div>
+      <div class="confirm-value" id="confirmEmail"></div>
+      <div class="confirm-note">Your registration status, entry QR code, and any updates will only be
+      sent here — make sure it's spelled correctly and is an inbox you actively check.</div>
+    </div>
+
+    <div class="confirm-section">
+      <div class="confirm-label">Mobile Number</div>
+      <div class="confirm-value" id="confirmPhone"></div>
+      <div class="confirm-note">We'll use this number to reach you directly if we ever have a question
+      about your registration.</div>
+    </div>
+
+    <div class="confirm-section">
+      <div class="confirm-label">Payment Details</div>
+      <div class="confirm-payment-row"><span>Channel</span><strong id="confirmChannel"></strong></div>
+      <div class="confirm-payment-row"><span>Reference No.</span><strong id="confirmReference"></strong></div>
+      <div class="confirm-payment-row"><span>Amount</span><strong id="confirmAmount"></strong></div>
+      <img id="confirmScreenshotThumb" class="confirm-screenshot-thumb" alt="Your uploaded payment screenshot" />
+      <div class="confirm-note">Double-check the reference number and amount match your GCash payment
+      exactly. This is the single most common reason registrations get flagged for correction or
+      rejected — getting it right the first time avoids that entirely.</div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" id="confirmEditBtn">Edit Details</button>
+      <button type="button" class="btn btn-primary" id="confirmSubmitBtn">Confirm &amp; Submit</button>
+    </div>
+  </div>
 </div>
 
 <script src="assets/config.js"></script>
