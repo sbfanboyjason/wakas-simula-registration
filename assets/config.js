@@ -27,8 +27,6 @@ const EVENT_CONFIG = {
   CURRENCY: '₱',
   TICKET_INCLUSIONS_NOTE: "Inclusive of tickets and freebies from SB19 A'tin Fanboys.",
 
-  // TODO — paste the Step 1 Apps Script Web App URL here once deployed.
-  // It looks like: https://script.google.com/macros/s/XXXXXXXXXXXX/exec
   BACKEND_URL: 'https://script.google.com/macros/s/AKfycbwtFOtFaIMffwV7ZS6J_moyj6vcwjB-jI6vIrnattF-x2udHCKRtxyDyxGMgX2RzZStgQ/exec',
 
   // GCash only.
@@ -43,9 +41,8 @@ const EVENT_CONFIG = {
   // Max size (in MB) accepted for the payment-screenshot upload.
   MAX_SCREENSHOT_MB: 5,
 
-  // Provisional text — replaced wholesale once Step 4 (T&C/DPA drafting) is done.
   DPA_NOTICE_HTML: `
-    <p><strong>Data Privacy Notice (Provisional — final version pending)</strong></p>
+    <p><strong>Data Privacy Notice</strong></p>
     <p>By registering, you allow the organizers of ${'SB19 "Wakas at Simula" Trilogy Finale — Block Screening'} to collect and process
     your full legal name, email address, mobile number, ticket quantity, and payment
     verification details (reference number and screenshot), solely for the purposes of:</p>
@@ -64,7 +61,7 @@ const EVENT_CONFIG = {
   `,
 
   TERMS_HTML: `
-    <p><strong>Terms & Conditions (Provisional — final version pending)</strong></p>
+    <p><strong>Terms & Conditions</strong></p>
     <ul>
       <li>All registrations are <strong>non-refundable</strong>, but <strong>transferable</strong> to
       another person, provided the original registrant informs the organizers in advance of the event.</li>
