@@ -29,7 +29,7 @@ const EVENT_CONFIG = {
 
   // TODO — paste the Step 1 Apps Script Web App URL here once deployed.
   // It looks like: https://script.google.com/macros/s/XXXXXXXXXXXX/exec
-  BACKEND_URL: 'REPLACE_WITH_YOUR_APPS_SCRIPT_WEB_APP_URL',
+  BACKEND_URL: 'https://script.google.com/macros/s/AKfycbwtFOtFaIMffwV7ZS6J_moyj6vcwjB-jI6vIrnattF-x2udHCKRtxyDyxGMgX2RzZStgQ/exec',
 
   // GCash only.
   PAYMENT_CHANNELS: [
