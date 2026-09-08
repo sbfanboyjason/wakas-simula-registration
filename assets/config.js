@@ -10,7 +10,7 @@ const EVENT_CONFIG = {
   EVENT_DATE_DISPLAY: 'October 10, 2026 · 3:00 PM',
   VENUE: 'SM Mall of Asia Cinema — ScreenX',
   ORGANIZER_NOTE:
-    "Fan-organized block screening by A'tin Fanboys. Not an official SB19 or management production.",
+    "Fan-organized block screening by SB19 A'tin Fanboys. Not an official SB19 or management production.",
 
   // Public pool is 230 of the venue's 269 seats (39 held back as an
   // admin reserve, releasable later — see Code.gs). This value is only
