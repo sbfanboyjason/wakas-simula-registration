@@ -295,6 +295,8 @@
         return;
       }
 
+  const honeypotEl = document.getElementById('website');
+      
       const payload = {
         fullName: values.fullName,
         email: values.email,
@@ -306,6 +308,7 @@
         paymentScreenshotFilename: screenshotFilename,
         dpaConsent: true,
         termsAccepted: true,
+        website: honeypotEl ? honeypotEl.value : '',
       };
 
       submitBtn.disabled = true;
