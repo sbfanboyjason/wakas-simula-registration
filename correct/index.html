@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Correct Payment Info — SB19 "Wakas at Simula"</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png" />
+<link rel="icon" href="../assets/favicon.ico" sizes="any" />
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="../assets/styles.css" />
 <link rel="stylesheet" href="../shared/credit-footer.css" />
 </head>
@@ -45,7 +48,14 @@
     <!-- Step 2: shown once lookup succeeds -->
     <div class="card" id="correctionCard" style="display:none">
       <h2>Update Your Payment Info</h2>
-      <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true"><label for="website">Leave this field blank</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off" /></div>
+
+      <!-- Honeypot — invisible to real visitors, left alone by them; bots that
+           blindly fill every field tend to fill this too, so a non-empty value
+           here signals spam. Not a real field, do not remove. -->
+      <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+        <label for="website">Leave this field blank</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+      </div>
       <div class="channel-details" id="lookupSummary" style="margin-bottom:16px"></div>
 
       <div class="field">
