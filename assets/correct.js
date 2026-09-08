@@ -129,12 +129,15 @@
       btn.disabled = true;
       btn.textContent = 'Submitting…';
 
+  const honeypotEl = document.getElementById('website');
+      
       const payload = {
         registrationId: verifiedRegId,
         email: verifiedEmail,
         paymentReference: newReference || undefined,
         paymentScreenshotBase64: screenshotBase64 || undefined,
         paymentScreenshotFilename: screenshotFilename || undefined,
+        website: honeypotEl ? honeypotEl.value : '',
       };
 
       fetch(cfg.BACKEND_URL + '?action=correct', {
