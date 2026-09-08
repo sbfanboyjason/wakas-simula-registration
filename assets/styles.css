@@ -1,0 +1,527 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0a0a0a;
+  --bg-panel: #151313;
+  --gold: #c9a24b;
+  --gold-soft: #e4c878;
+  --crimson: #8b1e2f;
+  --text: #f5f0e6;
+  --text-dim: rgba(245, 240, 230, 0.65);
+  --border: rgba(201, 162, 75, 0.25);
+  --danger: #e0555a;
+  --success: #6fbf73;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* Stops mobile browsers from auto-inflating text in narrow columns —
+     this, combined with 16px inputs below, is what keeps the page from
+     looking "zoomed in" on phones. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+
+  /* Background photo (background.jpg) with a dark gradient layered on
+     top for text legibility. If background.jpg isn't there yet, this
+     degrades gracefully to just the gradient over the solid --bg
+     color — i.e. exactly today's look, no broken-image artifacts.
+     Drop a file at assets/background.jpg (or .png) to activate it. */
+  background-color: var(--bg);
+  background-image: radial-gradient(circle at top, rgba(26, 20, 20, 0.82) 0%, rgba(10, 10, 10, 0.9) 60%),
+    url('background.jpg');
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+}
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(20px, 6vw, 32px) clamp(14px, 4.5vw, 20px) 80px;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.hero .logo-slot {
+  /* No frame/circle — the logo shows in full, at its own aspect ratio. */
+  width: clamp(96px, 30vw, 160px);
+  height: clamp(96px, 30vw, 160px);
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 2px;
+}
+
+.hero .logo-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.hero h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.3rem, 5.2vw, 1.7rem);
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  margin: 0 0 6px;
+  background: linear-gradient(120deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero .tagline {
+  text-transform: uppercase;
+  letter-spacing: clamp(0.12em, 2vw, 0.25em);
+  font-size: clamp(0.64rem, 2.6vw, 0.72rem);
+  color: var(--text-dim);
+  margin-bottom: 14px;
+}
+
+.hero .event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  font-size: clamp(0.76rem, 3vw, 0.85rem);
+  color: var(--text-dim);
+}
+
+.hero .event-meta span {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.hero .organizer-note {
+  margin-top: 14px;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 0 8px;
+}
+
+/* ---------- Slot counter ---------- */
+.slot-banner {
+  text-align: center;
+  margin: 22px 0;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+}
+
+.slot-banner .count {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  color: var(--gold-soft);
+}
+
+.slot-banner.sold-out {
+  border-color: var(--danger);
+}
+
+.slot-banner.sold-out .count {
+  color: var(--danger);
+}
+
+/* ---------- Cards / sections ---------- */
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(16px, 4.5vw, 22px) clamp(14px, 4vw, 20px);
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  color: var(--gold-soft);
+  margin: 0 0 14px;
+  letter-spacing: 0.03em;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.field input[type='text'],
+.field input[type='email'],
+.field input[type='tel'],
+.field input[type='number'] {
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  /* Deliberately 16px, not smaller: below 16px, iOS Safari zooms the
+     whole page in when the field is tapped, which is the "big fonts on
+     mobile" effect. This keeps the real on-page size compact while
+     avoiding that zoom entirely. */
+  font-size: 16px;
+  font-family: inherit;
+  min-height: 46px;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.field .hint {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.field .error {
+  font-size: 0.75rem;
+  color: var(--danger);
+  margin-top: 4px;
+  display: none;
+}
+
+.field.invalid input {
+  border-color: var(--danger);
+}
+
+.field.invalid .error {
+  display: block;
+}
+
+/* ---------- Payment channels ---------- */
+.channel-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.channel-option {
+  flex: 1 1 120px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.85rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.channel-option input {
+  display: none;
+}
+
+.channel-option.selected {
+  border-color: var(--gold);
+  background: rgba(201, 162, 75, 0.1);
+}
+
+.channel-details {
+  background: rgba(201, 162, 75, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.amount-due {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  color: var(--gold-soft);
+  margin: 6px 0 18px;
+}
+
+/* ---------- GCash QR ---------- */
+.qr-wrap {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.qr-thumb {
+  max-width: 200px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  cursor: zoom-in;
+  display: block;
+  margin: 0 auto;
+  transition: transform 0.15s;
+}
+
+.qr-thumb:active {
+  transform: scale(0.97);
+}
+
+.qr-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.94);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+  cursor: zoom-out;
+}
+
+.qr-lightbox[hidden] {
+  display: none;
+}
+
+.qr-lightbox img {
+  max-width: 100%;
+  max-height: 88vh;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.qr-lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 42px;
+  height: 42px;
+  min-height: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ---------- Required-field marker & payment warning ---------- */
+.req-mark {
+  color: var(--gold-soft);
+  font-weight: 500;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.warning-box {
+  background: rgba(224, 85, 90, 0.08);
+  border: 1px solid rgba(224, 85, 90, 0.4);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.warning-box strong {
+  color: var(--danger);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.upload-box {
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.upload-box.has-file {
+  border-color: var(--success);
+  color: var(--text);
+}
+
+.upload-preview {
+  max-width: 100%;
+  max-height: 160px;
+  margin-top: 10px;
+  border-radius: 8px;
+  display: none;
+}
+
+/* ---------- Consent / checkboxes ---------- */
+.consent-box {
+  max-height: 220px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+}
+
+.consent-box p,
+.consent-box li {
+  margin: 0 0 8px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  cursor: pointer;
+  padding: 6px 0;
+  min-height: 44px;
+}
+
+.checkbox-row input {
+  margin-top: 3px;
+  min-width: 18px;
+  min-height: 18px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  min-height: 48px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-primary {
+  background: linear-gradient(120deg, var(--gold), var(--gold-soft));
+  color: #1a1414;
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* ---------- DPA gate overlay ---------- */
+#dpaGate {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 500;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+#dpaGate .wrap {
+  max-width: 560px;
+}
+
+#mainForm[hidden],
+#dpaGate[hidden] {
+  display: none !important;
+}
+
+/* ---------- Status banners ---------- */
+.status-banner {
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.status-banner.show {
+  display: block;
+}
+
+.status-banner.success {
+  background: rgba(111, 191, 115, 0.12);
+  border: 1px solid var(--success);
+  color: var(--success);
+}
+
+.status-banner.error {
+  background: rgba(224, 85, 90, 0.12);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.reg-id {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  color: var(--gold-soft);
+}
+
+/* ---------- Small-phone tightening (iPhone SE / narrow Android) ---------- */
+@media (max-width: 380px) {
+  .card h2 {
+    font-size: 0.95rem;
+  }
+  .slot-banner .count {
+    font-size: 1.15rem;
+  }
+  .amount-due {
+    font-size: 1.1rem;
+  }
+  .channel-options {
+    gap: 8px;
+  }
+  .upload-box {
+    padding: 12px;
+  }
+}
+
+/* Respect a viewer who has asked their OS/browser to reduce motion. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

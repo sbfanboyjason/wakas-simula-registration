@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Correct Payment Info — SB19 "Wakas at Simula"</title>
+<link rel="stylesheet" href="../assets/styles.css" />
+<link rel="stylesheet" href="../shared/credit-footer.css" />
+</head>
+<body>
+
+<main>
+  <div class="wrap">
+    <div class="hero">
+      <div class="logo-slot" id="logoSlot">
+        <img src="../assets/logo.png" alt="SB19 A'tin Fanboys logo"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+        <span style="display:none">Your logo here<br />(assets/logo.png)</span>
+      </div>
+      <h1 id="eventName"></h1>
+      <div class="tagline">Correct Your Payment Info</div>
+    </div>
+
+    <div class="status-banner" id="statusBanner"></div>
+
+    <!-- Step 1: look up the registration -->
+    <div class="card" id="lookupCard">
+      <h2>Find Your Registration</h2>
+
+      <div class="field" id="field-regId">
+        <label for="regId">Registration ID</label>
+        <input type="text" id="regId" placeholder="WAS-00001" />
+        <div class="error">Please enter your Registration ID.</div>
+      </div>
+
+      <div class="field" id="field-lookupEmail">
+        <label for="lookupEmail">Email Address (the one you registered with)</label>
+        <input type="email" id="lookupEmail" />
+        <div class="error">Please enter the email you registered with.</div>
+      </div>
+
+      <button class="btn btn-primary" id="lookupBtn">Find My Registration</button>
+    </div>
+
+    <!-- Step 2: shown once lookup succeeds -->
+    <div class="card" id="correctionCard" style="display:none">
+      <h2>Update Your Payment Info</h2>
+      <div class="channel-details" id="lookupSummary" style="margin-bottom:16px"></div>
+
+      <div class="field">
+        <label for="newReference">Corrected Payment Reference / Transaction Number</label>
+        <input type="text" id="newReference" placeholder="Leave blank if unchanged" />
+      </div>
+
+      <div class="field">
+        <label>New Payment Screenshot</label>
+        <div class="upload-box" id="uploadBox">
+          <span id="uploadBoxText">Tap to upload a new screenshot (optional if only the reference number changed)</span>
+          <input type="file" id="screenshotInput" accept="image/*" style="display:none" />
+        </div>
+        <img id="uploadPreview" class="upload-preview" alt="Payment screenshot preview" />
+      </div>
+
+      <button class="btn btn-primary" id="submitCorrectionBtn">Submit Correction</button>
+    </div>
+
+    <div id="successPanel" class="card" style="display:none">
+      <h2>Correction Received</h2>
+      <p>Your registration is back in the verification queue as <strong>Pending Payment
+      Verification</strong>. We'll follow up by email once it's checked.</p>
+    </div>
+  </div>
+</main>
+
+<script src="../assets/config.js"></script>
+<script src="../assets/correct.js"></script>
+<script src="../shared/credit-footer.js"></script>
+</body>
+</html>

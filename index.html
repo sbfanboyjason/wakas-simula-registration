@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SB19 "Wakas at Simula" Trilogy Finale — Registration</title>
+<link rel="stylesheet" href="assets/styles.css" />
+<link rel="stylesheet" href="shared/credit-footer.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     DATA PRIVACY GATE — shown first, blocks everything else until
+     the registrant explicitly consents.
+     ============================================================ -->
+<div id="dpaGate">
+  <div class="wrap">
+    <div class="hero">
+      <div class="logo-slot" id="logoSlotGate">
+        <img src="assets/logo.png" alt="SB19 A'tin Fanboys logo"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+        <span style="display:none">Your logo here<br />(assets/logo.png)</span>
+      </div>
+      <h1 id="eventNameGate"></h1>
+      <div class="tagline" id="eventTaglineGate"></div>
+    </div>
+
+    <div class="card">
+      <h2>Before you register — Data Privacy Notice</h2>
+      <div class="consent-box" id="dpaText"></div>
+      <label class="checkbox-row">
+        <input type="checkbox" id="dpaCheckbox" />
+        <span>I have read and understood the Data Privacy Notice above, and I consent to the
+        collection and processing of my personal information as described.</span>
+      </label>
+    </div>
+
+    <button class="btn btn-primary" id="dpaContinueBtn" disabled>Continue to Registration</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN REGISTRATION FORM — hidden until DPA consent is given.
+     ============================================================ -->
+<main id="mainForm" hidden>
+  <div class="wrap">
+
+    <div class="hero">
+      <div class="logo-slot" id="logoSlotMain">
+        <img src="assets/logo.png" alt="SB19 A'tin Fanboys logo"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+        <span style="display:none">Your logo here<br />(assets/logo.png)</span>
+      </div>
+      <h1 id="eventNameMain"></h1>
+      <div class="tagline" id="eventTaglineMain"></div>
+      <div class="event-meta">
+        <span id="metaDate"></span>
+        <span id="metaVenue"></span>
+      </div>
+      <div class="organizer-note" id="organizerNote"></div>
+    </div>
+
+    <div class="slot-banner" id="slotBanner">
+      <div class="count" id="slotCount">Checking availability…</div>
+      <div class="hint" id="slotHint"></div>
+    </div>
+
+    <div class="status-banner" id="statusBanner"></div>
+
+    <form id="registrationForm" novalidate>
+
+      <!-- Personal info -->
+      <div class="card">
+        <h2>Registrant Information</h2>
+
+        <div class="field" id="field-fullName">
+          <label for="fullName">Full Legal Name</label>
+          <input type="text" id="fullName" name="fullName" autocomplete="name" required />
+          <div class="hint">As it appears on a valid government ID — this must match at entry.</div>
+          <div class="error">Please enter your full legal name.</div>
+        </div>
+
+        <div class="field" id="field-email">
+          <label for="email">Valid Email Address</label>
+          <input type="email" id="email" name="email" autocomplete="email" required />
+          <div class="hint">Your registration status and QR code will be sent here.</div>
+          <div class="error">Please enter a valid email address.</div>
+        </div>
+
+        <div class="field" id="field-phone">
+          <label for="phone">Valid Mobile Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="09XXXXXXXXX" autocomplete="tel" required />
+          <div class="hint">Philippine mobile number, e.g. 09171234567.</div>
+          <div class="error">Please enter a valid Philippine mobile number.</div>
+        </div>
+
+        <div class="field" id="field-qty">
+          <label for="ticketQuantity">Number of Tickets</label>
+          <input type="number" id="ticketQuantity" name="ticketQuantity" min="1" value="1" required />
+          <div class="hint" id="qtyHint"></div>
+          <div class="error">Please enter a valid ticket quantity.</div>
+        </div>
+
+        <div class="amount-due" id="amountDue"></div>
+        <div class="hint" id="ticketInclusionsNote" style="text-align:center; margin-top:-10px; margin-bottom:4px"></div>
+      </div>
+
+      <!-- Payment -->
+      <div class="card">
+        <h2>Payment</h2>
+        <div class="channel-options" id="channelOptions"></div>
+        <div class="channel-details" id="channelDetails">Select a payment channel above to see details.</div>
+
+        <div class="qr-wrap">
+          <p class="hint" style="margin-bottom:8px">Scan to pay via GCash — tap the QR to enlarge for easier scanning.</p>
+          <img id="gcashQrThumb" class="qr-thumb" src="assets/gcash-qr.jpg" alt="GCash QR code for payment" />
+        </div>
+
+        <div class="warning-box">
+          <strong>Enter your details exactly as they appear on your GCash transaction.</strong>
+          If the reference number or screenshot you submit doesn't match an actual payment — wrong
+          number, mismatched amount, or unrelated screenshot — your registration will be flagged as a
+          payment mismatch. You'll then have 24 hours to correct it before your reserved seat(s) are
+          automatically released back to other registrants.
+        </div>
+
+        <div class="field" id="field-reference">
+          <label for="paymentReference">Payment Reference / Transaction Number <span class="req-mark">(Required)</span></label>
+          <input type="text" id="paymentReference" name="paymentReference" required />
+          <div class="hint">Copy this exactly from your GCash receipt/confirmation.</div>
+          <div class="error">Please enter your exact GCash payment reference number.</div>
+        </div>
+
+        <div class="field">
+          <label>Payment Screenshot <span class="req-mark">(Required)</span></label>
+          <div class="upload-box" id="uploadBox">
+            <span id="uploadBoxText">Tap to upload a screenshot of your GCash payment confirmation (max
+              <span id="maxMb"></span>MB)</span>
+            <input type="file" id="screenshotInput" accept="image/*" style="display:none" />
+          </div>
+          <img id="uploadPreview" class="upload-preview" alt="Payment screenshot preview" />
+          <div class="error" id="uploadError">Please upload a screenshot of your GCash payment.</div>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <div class="card">
+        <h2>Terms & Conditions</h2>
+        <div class="consent-box" id="termsText"></div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="termsCheckbox" required />
+          <span>I have read and agree to the Terms & Conditions above.</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="submitBtn">Submit Registration</button>
+    </form>
+
+    <div id="successPanel" class="card" style="display:none">
+      <h2>Registration Received</h2>
+      <p>Your registration ID is <span class="reg-id" id="successRegId"></span>.</p>
+      <p>We've emailed a copy of your submitted details to your registered email address. Your
+      status is currently <strong>Pending Payment Verification</strong> — you'll receive a second
+      email with your entry QR code once payment is verified. If there's ever an issue with your
+      payment, we'll email you a link to fix it yourself — just keep your Registration ID handy.</p>
+    </div>
+
+  </div>
+</main>
+
+<!-- Tap-to-enlarge viewer for the GCash QR — sits outside .wrap so it can cover the full screen. -->
+<div id="qrLightbox" class="qr-lightbox" hidden>
+  <img id="qrLightboxImg" src="assets/gcash-qr.jpg" alt="GCash QR code (enlarged) for payment" />
+  <button type="button" id="qrLightboxClose" class="qr-lightbox-close" aria-label="Close">&times;</button>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/script.js"></script>
+<script src="shared/credit-footer.js"></script>
+</body>
+</html>

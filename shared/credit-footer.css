@@ -1,0 +1,32 @@
+/* ============================================================
+   Shared "Developed by" credit — included on every page
+   (registration page, admin page, check-in scanner).
+   Fixed to the lower-right corner, subtle, never blocks content.
+   ============================================================ */
+.dev-credit {
+  position: fixed;
+  right: 12px;
+  bottom: 10px;
+  font-size: 0.72rem;
+  color: rgba(245, 240, 230, 0.65);
+  background: rgba(10, 10, 10, 0.45);
+  padding: 5px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 9999;
+  pointer-events: none;
+  letter-spacing: 0.02em;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  border: 1px solid rgba(245, 240, 230, 0.12);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .dev-credit {
+    font-size: 0.62rem;
+    padding: 4px 9px;
+    right: 8px;
+    bottom: 8px;
+  }
+}
