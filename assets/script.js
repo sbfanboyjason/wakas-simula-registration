@@ -268,10 +268,115 @@
     el.className = 'status-banner';
   }
 
+  // ---------- Pre-submit confirmation modal ----------
+  // Registrants only get one shot at this — a wrong name, a stale email, or
+  // a mistyped reference number are the most common reasons a registration
+  // has to be corrected or rejected later. This forces a deliberate look
+  // at exactly those fields before anything gets sent. All values here are
+  // the registrant's own, set via textContent (never innerHTML), so there's
+  // no way for typed text to be interpreted as markup.
+  function channelLabel(id) {
+    const ch = cfg.PAYMENT_CHANNELS.find(function (c) { return c.id === id; });
+    return ch ? ch.label : id || '—';
+  }
+
+  function populateConfirmModal(values) {
+    document.getElementById('confirmFullName').textContent = values.fullName;
+    document.getElementById('confirmEmail').textContent = values.email;
+    document.getElementById('confirmPhone').textContent = values.phone;
+    document.getElementById('confirmChannel').textContent = channelLabel(selectedChannelId);
+    document.getElementById('confirmReference').textContent = values.paymentReference;
+
+    const qty = Number(values.ticketQuantity) || 0;
+    document.getElementById('confirmAmount').textContent = cfg.PRICE_PER_TICKET
+      ? `${cfg.CURRENCY}${(qty * cfg.PRICE_PER_TICKET).toLocaleString()} (${qty} ticket${qty === 1 ? '' : 's'})`
+      : `${qty} ticket${qty === 1 ? '' : 's'}`;
+
+    const thumb = document.getElementById('confirmScreenshotThumb');
+    const uploadedPreview = document.getElementById('uploadPreview');
+    if (thumb && uploadedPreview && uploadedPreview.src) {
+      thumb.src = uploadedPreview.src;
+      thumb.style.display = 'block';
+    } else if (thumb) {
+      thumb.style.display = 'none';
+    }
+  }
+
+  function openConfirmModal() {
+    document.getElementById('confirmModal').hidden = false;
+  }
+
+  function closeConfirmModal() {
+    document.getElementById('confirmModal').hidden = true;
+  }
+
+  function setupConfirmModal() {
+    document.getElementById('confirmEditBtn').addEventListener('click', closeConfirmModal);
+    document.getElementById('confirmModal').addEventListener('click', function (e) {
+      if (e.target.id === 'confirmModal') closeConfirmModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !document.getElementById('confirmModal').hidden) closeConfirmModal();
+    });
+  }
+
   // ---------- Submit ----------
   function setupSubmit() {
     const form = document.getElementById('registrationForm');
     const submitBtn = document.getElementById('submitBtn');
+    const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+    let pendingValues = null;
+
+    function doActualSubmit(values) {
+      const honeypotEl = document.getElementById('website');
+
+      const payload = {
+        fullName: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        ticketQuantity: values.ticketQuantity,
+        paymentChannel: selectedChannelId,
+        paymentReference: values.paymentReference,
+        paymentScreenshotBase64: screenshotBase64,
+        paymentScreenshotFilename: screenshotFilename,
+        dpaConsent: true,
+        termsAccepted: true,
+        website: honeypotEl ? honeypotEl.value : '',
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+      confirmSubmitBtn.disabled = true;
+
+      // NOTE: Content-Type is text/plain on purpose — see Code.gs comments.
+      // This avoids a CORS preflight that Apps Script web apps don't handle,
+      // while the backend still parses the body as JSON.
+      fetch(cfg.BACKEND_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          confirmSubmitBtn.disabled = false;
+          if (!data.ok) {
+            showStatus('error', data.error || 'Something went wrong. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Registration';
+            return;
+          }
+          form.style.display = 'none';
+          document.getElementById('successPanel').style.display = 'block';
+          document.getElementById('successRegId').textContent = data.registrationId;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        })
+        .catch(() => {
+          confirmSubmitBtn.disabled = false;
+          showStatus('error', 'Network error — please check your connection and try again.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Registration';
+        });
+    }
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -295,51 +400,15 @@
         return;
       }
 
-  const honeypotEl = document.getElementById('website');
-      
-      const payload = {
-        fullName: values.fullName,
-        email: values.email,
-        phone: values.phone,
-        ticketQuantity: values.ticketQuantity,
-        paymentChannel: selectedChannelId,
-        paymentReference: values.paymentReference,
-        paymentScreenshotBase64: screenshotBase64,
-        paymentScreenshotFilename: screenshotFilename,
-        dpaConsent: true,
-        termsAccepted: true,
-        website: honeypotEl ? honeypotEl.value : '',
-      };
+      pendingValues = values;
+      populateConfirmModal(values);
+      openConfirmModal();
+    });
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting…';
-
-      // NOTE: Content-Type is text/plain on purpose — see Code.gs comments.
-      // This avoids a CORS preflight that Apps Script web apps don't handle,
-      // while the backend still parses the body as JSON.
-      fetch(cfg.BACKEND_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (!data.ok) {
-            showStatus('error', data.error || 'Something went wrong. Please try again.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Registration';
-            return;
-          }
-          form.style.display = 'none';
-          document.getElementById('successPanel').style.display = 'block';
-          document.getElementById('successRegId').textContent = data.registrationId;
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        })
-        .catch(() => {
-          showStatus('error', 'Network error — please check your connection and try again.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Submit Registration';
-        });
+    confirmSubmitBtn.addEventListener('click', function () {
+      if (!pendingValues) return;
+      closeConfirmModal();
+      doActualSubmit(pendingValues);
     });
 
     document.getElementById('ticketQuantity').addEventListener('input', updateAmountDue);
@@ -352,6 +421,7 @@
     renderChannels();
     setupQrLightbox();
     setupUpload();
+    setupConfirmModal();
     setupSubmit();
   });
 })();

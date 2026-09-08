@@ -19,6 +19,19 @@
     document.getElementById('statusBanner').className = 'status-banner';
   }
 
+  // Registration data (name, reference no., etc.) comes straight from what
+  // whoever registered typed in — it must be escaped before going into
+  // innerHTML, or a registrant could put a script tag in their own name
+  // and have it run in the browser of anyone who looks their record up.
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function populateEventInfo() {
     document.getElementById('eventName').textContent = cfg.EVENT_NAME;
 
@@ -71,9 +84,9 @@
           verifiedEmail = email;
 
           document.getElementById('lookupSummary').innerHTML =
-            `<strong>${data.fullName}</strong> — ${data.ticketQuantity} ticket(s)<br>` +
-            `Current status: ${data.status}<br>` +
-            `Current reference on file: ${data.currentReference || '(none)'}`;
+            `<strong>${escapeHtml(data.fullName)}</strong> — ${escapeHtml(data.ticketQuantity)} ticket(s)<br>` +
+            `Current status: ${escapeHtml(data.status)}<br>` +
+            `Current reference on file: ${escapeHtml(data.currentReference) || '(none)'}`;
 
           document.getElementById('lookupCard').style.display = 'none';
           document.getElementById('correctionCard').style.display = 'block';
@@ -129,8 +142,8 @@
       btn.disabled = true;
       btn.textContent = 'Submitting…';
 
-  const honeypotEl = document.getElementById('website');
-      
+      const honeypotEl = document.getElementById('website');
+
       const payload = {
         registrationId: verifiedRegId,
         email: verifiedEmail,
