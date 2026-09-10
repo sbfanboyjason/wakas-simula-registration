@@ -1,0 +1,268 @@
+<title>Wakas Reminder Preview</title>
+<style>
+  :root {
+    --bg: #f2ecdf;
+    --ink: #2a2318;
+    --muted: #756a54;
+    --line: #ddd2b8;
+    --accent: #a8752c;
+    --pill-bg: #ecdcb4;
+    --pill-ink: #5c4419;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16140f;
+      --ink: #f0e9da;
+      --muted: #9a8f78;
+      --line: #35301f;
+      --accent: #d1a44e;
+      --pill-bg: #3a2f19;
+      --pill-ink: #e9c887;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16140f;
+    --ink: #f0e9da;
+    --muted: #9a8f78;
+    --line: #35301f;
+    --accent: #d1a44e;
+    --pill-bg: #3a2f19;
+    --pill-ink: #e9c887;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Helvetica, Arial, sans-serif;
+    padding-block: 40px;
+  }
+  .wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .email-frame {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px -18px rgba(0,0,0,0.35);
+  }
+</style>
+
+<div class="wrap">
+  <div class="email-frame">
+    <!-- ===== BEGIN EMAIL CONTENT (unchanged from the template) ===== -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0d; font-family:Georgia, 'Times New Roman', serif;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background-color:#141418; border-radius:14px; overflow:hidden; border:1px solid #2a2a32;">
+
+            <!-- Header banner -->
+            <tr>
+              <td style="background:linear-gradient(135deg,#1a1a20,#0a0a0d); padding:40px 32px 28px 32px; text-align:center; border-bottom:2px solid #c9a24b;">
+                <img src="https://sbfanboyjason.github.io/wakas-simula-registration/assets/logo.png" width="72" height="72" alt="SB19 A'tin Fanboys" style="display:block; margin:0 auto 14px auto; width:72px; height:72px; border:0;">
+                <p style="margin:0; letter-spacing:4px; font-size:11px; color:#c9a24b; text-transform:uppercase; font-family:Helvetica, Arial, sans-serif;">SB19 Trilogy Finale &middot; Block Screening</p>
+                <h1 style="margin:10px 0 6px 0; font-size:30px; line-height:1.2; color:#f5f1e6; font-weight:normal; letter-spacing:1px;">WAKAS AT SIMULA</h1>
+                <p style="margin:0; font-size:13px; color:#9a9aa2; font-family:Helvetica, Arial, sans-serif;">Your seat is confirmed — here's what to know before the big day</p>
+              </td>
+            </tr>
+
+            <!-- Greeting -->
+            <tr>
+              <td style="padding:28px 32px 0 32px; font-family:Helvetica, Arial, sans-serif;">
+                <p style="margin:0 0 6px 0; font-size:15px; color:#e8e6df;">Hi {{FULL_NAME}},</p>
+                <p style="margin:0; font-size:14px; color:#b5b3ba; line-height:1.6;">
+                  Screening day is almost here! Below is your ticket summary, everything you need to bring,
+                  and answers to the questions we get asked most. Save this email — you'll want it on hand.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Please-read-in-full notice -->
+            <tr>
+              <td style="padding:18px 32px 0 32px; font-family:Helvetica, Arial, sans-serif;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#1e1a10; border:1px solid #6b5322; border-radius:8px;">
+                  <tr>
+                    <td style="padding:14px 16px; font-size:13px; color:#e6c987; line-height:1.6;">
+                      <strong style="color:#f0d9a3;">Please read this email in full</strong> before the event. It covers everything you need to know about entry, arrival, and seating, and we're not able to make exceptions for details already explained here — so a few minutes now will save you a surprise on the day.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Ticket stub -->
+            <tr>
+              <td style="padding:24px 32px 8px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#1c1c22; border:1px dashed #c9a24b; border-radius:10px;">
+                  <tr>
+                    <td style="padding:22px 24px; font-family:Helvetica, Arial, sans-serif;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="font-size:11px; color:#8a8890; text-transform:uppercase; letter-spacing:1px; padding-bottom:4px;">Event</td>
+                        </tr>
+                        <tr>
+                          <td style="font-size:15px; color:#f5f1e6; padding-bottom:14px;">SB19 "Wakas at Simula" Trilogy Finale — Block Screening</td>
+                        </tr>
+                      </table>
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td width="50%" style="font-size:11px; color:#8a8890; text-transform:uppercase; letter-spacing:1px; padding-bottom:4px;">Date &amp; Time</td>
+                          <td width="50%" style="font-size:11px; color:#8a8890; text-transform:uppercase; letter-spacing:1px; padding-bottom:4px;">Venue</td>
+                        </tr>
+                        <tr>
+                          <td style="font-size:14px; color:#e8e6df; padding-bottom:14px;">October 10, 2026<br>3:00 PM screening — team on-site from around lunchtime</td>
+                          <td style="font-size:14px; color:#e8e6df; padding-bottom:14px;">SM Mall of Asia Cinema<br>ScreenX Hall</td>
+                        </tr>
+                      </table>
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td width="50%" style="font-size:11px; color:#8a8890; text-transform:uppercase; letter-spacing:1px; padding-bottom:4px;">Registration ID</td>
+                          <td width="50%" style="font-size:11px; color:#8a8890; text-transform:uppercase; letter-spacing:1px; padding-bottom:4px;">Tickets</td>
+                        </tr>
+                        <tr>
+                          <td style="font-size:14px; color:#e8e6df;">{{REGISTRATION_ID}}</td>
+                          <td style="font-size:14px; color:#e8e6df;">{{TICKET_QUANTITY}}</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- QR code -->
+            <tr>
+              <td style="padding:20px 32px 8px 32px; text-align:center; font-family:Helvetica, Arial, sans-serif;">
+                <p style="margin:0 0 12px 0; font-size:13px; color:#c9a24b; text-transform:uppercase; letter-spacing:1px;">Your Entry QR Code</p>
+                <div style="background-color:#f5f1e6; border-radius:10px; padding:16px; display:inline-block;">
+                  <img src="cid:{{QR_CID}}" width="180" height="180" alt="Entry QR code for {{REGISTRATION_ID}}" style="display:block; width:180px; height:180px;">
+                  <p style="margin:10px 0 0 0; font-size:12px; color:#4a4740; letter-spacing:1px; font-family:'Courier New', Courier, monospace;">{{REGISTRATION_ID}}</p>
+                </div>
+                <p style="margin:12px 0 0 0; font-size:12px; color:#8a8890; line-height:1.5;">
+                  Present this at the entrance — a screenshot or the email open on your phone both work.<br>No need to print.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Reminders -->
+            <tr>
+              <td style="padding:32px 32px 8px 32px; font-family:Helvetica, Arial, sans-serif;">
+                <h2 style="margin:0 0 14px 0; font-size:16px; color:#c9a24b; font-weight:normal; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #2a2a32; padding-bottom:10px;">Before You Go</h2>
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:0 0 14px 0; vertical-align:top; width:28px; font-size:14px; color:#c9a24b;">1.</td>
+                    <td style="padding:0 0 14px 0; font-size:13px; color:#d5d3da; line-height:1.6;"><strong style="color:#e8e6df;">Arrive as early as you can.</strong> There's no fixed gate time — our team will be on-site from around lunchtime handing out tickets ourselves, in person, on a first-come-first-served basis. The earlier you're in line, the earlier you're seated.</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 0 14px 0; vertical-align:top; font-size:14px; color:#c9a24b;">2.</td>
+                    <td style="padding:0 0 14px 0; font-size:13px; color:#d5d3da; line-height:1.6;"><strong style="color:#e8e6df;">Bring a valid ID</strong> matching the name on this registration, plus your QR code above.</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 0 14px 0; vertical-align:top; font-size:14px; color:#c9a24b;">3.</td>
+                    <td style="padding:0 0 14px 0; font-size:13px; color:#d5d3da; line-height:1.6;"><strong style="color:#e8e6df;">Seats are given out in arrival order, completely random</strong> — but if you registered a companion or multiple tickets, your whole group is seated together in sequence.</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0; vertical-align:top;" colspan="2">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#241a1a; border:1px solid #6b3a3a; border-radius:8px; margin:2px 0 14px 0;">
+                        <tr>
+                          <td style="padding:12px 14px; font-size:13px; color:#e8b4b4; line-height:1.6;">
+                            <strong style="color:#f5d5d5;">Arriving late isn't really an option.</strong> Our team hands out every ticket ourselves, and once the screening starts we'll be inside watching it too — there won't be anyone left outside to give you yours.
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 0 14px 0; vertical-align:top; font-size:14px; color:#c9a24b;">4.</td>
+                    <td style="padding:0 0 14px 0; font-size:13px; color:#d5d3da; line-height:1.6;"><strong style="color:#e8e6df;">No outside food or drinks</strong> inside the cinema — standard SM Cinema house rules apply.</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 0 14px 0; vertical-align:top; font-size:14px; color:#c9a24b;">5.</td>
+                    <td style="padding:0 0 14px 0; font-size:13px; color:#d5d3da; line-height:1.6;"><strong style="color:#e8e6df;">No professional cameras or recording devices.</strong> Phones for personal photos before/after are fine — please don't record the screening itself.</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- FAQ -->
+            <tr>
+              <td style="padding:24px 32px 8px 32px; font-family:Helvetica, Arial, sans-serif;">
+                <h2 style="margin:0 0 14px 0; font-size:16px; color:#c9a24b; font-weight:normal; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #2a2a32; padding-bottom:10px;">Frequently Asked Questions</h2>
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6;">What exactly is ScreenX?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">ScreenX extends the movie onto the side walls for a 270° panoramic view — a different experience from a standard cinema hall, so expect a wraparound picture during certain scenes.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">What do I need to bring for entry?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">A valid government or school ID matching the registered name, and the QR code in this email (digital is fine — no need to print).</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">What time should I arrive?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">There's no fixed gate time — the organizing team will be on-site from around lunchtime, handing out tickets ourselves. Arrive as early as you can: it's first-come-first-served, and once we head in to watch the screening, no one's left outside to hand out tickets.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">Is seating assigned, or first-come-first-served?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">Seats are handed out in the order you arrive, and it's completely random — except if you registered a companion or multiple tickets, in which case your group is kept together and seated in sequence.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">Can someone else use my slot if I can't make it?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">Yes — slots are transferable as long as you notify us at {{ORGANIZER_EMAIL}} at least 24 hours beforehand. If you transfer your slot without notifying us first, we reserve the right to cancel that registration.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">What if I can't attend anymore — is there a refund?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">Registrations are non-refundable. If you can no longer attend, your best option is to transfer your slot to someone else (see above, with at least 24 hours' notice to {{ORGANIZER_EMAIL}}).</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">I lost my QR code / didn't get this email — what do I do?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">Email {{ORGANIZER_EMAIL}} with your registered name and registration ID and we'll resend it.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">Can I bring food or drinks inside?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">Outside food and drinks aren't allowed inside SM Cinemas. Concessions are available at the venue.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">Can I take photos or record video during the screening?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">Photos before/after are welcome, but recording during the screening isn't allowed, in line with cinema policy and content rights.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">Is there an age restriction, or can minors attend?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">Open to all ages. Minors must be accompanied by a paying guardian — meaning the guardian needs their own registered, paid ticket, not just a free chaperone slot.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">Is there parking at the venue?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">SM Mall of Asia has on-site paid parking (mall rates apply). Arriving early is recommended, as mall traffic gets heavy on event days.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">What happens if the screening is rescheduled or cancelled?</td></tr>
+                  <tr><td style="padding:0 0 16px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">We'll notify all registered attendees by email right away — though this is very unlikely at this point, since the venue is already booked and confirmed.</td></tr>
+
+                  <tr><td style="padding:14px 0 4px 0; font-size:14px; color:#f5f1e6; border-top:1px solid #23232a;">Who do I contact if I have other questions?</td></tr>
+                  <tr><td style="padding:0 0 4px 0; font-size:13px; color:#a9a7ae; line-height:1.6;">Reach us anytime at {{ORGANIZER_EMAIL}} — we're happy to help.</td></tr>
+
+                </table>
+              </td>
+            </tr>
+
+            <!-- Sign-off -->
+            <tr>
+              <td style="padding:24px 32px 32px 32px; font-family:Helvetica, Arial, sans-serif;">
+                <p style="margin:0; font-size:13px; color:#b5b3ba; line-height:1.6;">
+                  See you at ScreenX. Same time, same fandom, one last chapter.
+                </p>
+                <p style="margin:16px 0 0 0; font-size:13px; color:#8a8890;">— SB19 A'tin Fanboys</p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="background-color:#0e0e12; padding:20px 32px; text-align:center; border-top:1px solid #2a2a32;">
+                <p style="margin:0; font-size:11px; color:#5f5d66; font-family:Helvetica, Arial, sans-serif;">
+                  This reminder was sent because your registration (ID {{REGISTRATION_ID}}) is confirmed Approved.<br>
+                  Questions? Email {{ORGANIZER_EMAIL}}.
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+    <!-- ===== END EMAIL CONTENT ===== -->
+  </div>
+</div>
