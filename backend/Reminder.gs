@@ -10,6 +10,7 @@
  *    Preview Event Reminder        - shows the email on screen, sends nothing
  *    Send Event Reminder to Me     - sends one test copy to the organizer inbox
  *    Send Event Reminder to All    - sends to every Approved registrant
+ *    Refresh Reminder Status       - rebuilds the "Reminder Status" tab
  *
  *  Gmail limits how many people a script can email per day (about 100
  *  for a free Gmail account). "Send to All" stops when that runs out and
@@ -21,6 +22,7 @@
 
 const REMINDER = {
   SENT_HEADER: 'Event Reminder Sent',
+  STATUS_SHEET: 'Reminder Status',
   TRANSFER_DEADLINE: '3:00 PM on Friday, October 9',
   QUOTA_RESERVE: 2, // leave a couple of sends for urgent one-off emails
   TIME_LIMIT_MS: 4.5 * 60 * 1000, // Apps Script stops runs at 6 minutes
@@ -263,6 +265,7 @@ function sendEventReminders() {
     if (ans !== ui.Button.YES || canSend === 0) return;
 
     const started = Date.now();
+    const failures = reminderLoadFailures_();
     let sent = 0, failed = 0;
     for (let k = 0; k < pending.length && sent < canSend; k++) {
       if (Date.now() - started > REMINDER.TIME_LIMIT_MS) break;
@@ -270,14 +273,18 @@ function sendEventReminders() {
       try {
         reminderSend_(x.rowObj['Email Address'], x.rowObj, false);
         info.sheet.getRange(x.rowNum, info.sentCol).setValue(new Date());
+        delete failures[x.rowObj['Registration ID']];
         sent++;
       } catch (err) {
         failed++;
+        failures[x.rowObj['Registration ID']] = err.message;
         console.error('Reminder failed for ' + x.rowObj['Registration ID'] + ': ' + err.message);
         if (/limit|quota/i.test(err.message)) break;
       }
     }
     SpreadsheetApp.flush();
+    PropertiesService.getScriptProperties().setProperty('reminderFailures', JSON.stringify(failures));
+    try { refreshReminderStatus_(); } catch (err) { console.error('Reminder Status tab: ' + err.message); }
 
     try {
       getOrCreateAuditSheet_().appendRow([new Date(), safeActiveUserEmail_(), CONFIG.SHEET_NAME, '', '', REMINDER.SENT_HEADER, '', '',
@@ -289,10 +296,89 @@ function sendEventReminders() {
       'Sent ' + sent + ' reminder(s).' +
         (failed ? ' ' + failed + ' failed (see Executions log).' : '') +
         (left > 0
-          ? '\n\n' + left + ' still to send. Run "Send Event Reminder to All" again later; it skips everyone already sent.'
+          ? '\n\nSee the "Reminder Status" tab for who still needs it.\n' + left + ' still to send. Run "Send Event Reminder to All" again later; it skips everyone already sent.'
           : '\n\nEveryone approved has the reminder now.')
     );
   } finally {
     lock.releaseLock();
   }
+}
+
+// ============================================================
+//  "Reminder Status" tab
+// ============================================================
+
+function reminderLoadFailures_() {
+  try {
+    return JSON.parse(PropertiesService.getScriptProperties().getProperty('reminderFailures') || '{}');
+  } catch (err) {
+    return {};
+  }
+}
+
+/** Menu: Refresh Reminder Status. */
+function refreshReminderStatus() {
+  refreshReminderStatus_();
+  SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(REMINDER.STATUS_SHEET)
+  );
+}
+
+/**
+ * Rebuilds the "Reminder Status" tab from the Registrations sheet: a
+ * summary at the top, then one row per Approved registrant showing
+ * Sent / Not sent yet / Failed. Read-only view; safe to rebuild anytime.
+ */
+function refreshReminderStatus_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const info = reminderTargets_();
+  const failures = reminderLoadFailures_();
+  const sheet = info.sheet;
+  const sentValues = sheet.getRange(1, info.sentCol, sheet.getLastRow(), 1).getValues();
+
+  let tab = ss.getSheetByName(REMINDER.STATUS_SHEET);
+  if (!tab) tab = ss.insertSheet(REMINDER.STATUS_SHEET);
+  tab.clear();
+  tab.getRange(1, 1, tab.getMaxRows(), 6).clearDataValidations();
+
+  const rows = info.targets.map(function (x) {
+    const at = sentValues[x.rowNum - 1][0];
+    const fail = failures[x.rowObj['Registration ID']];
+    const state = at ? 'Sent' : fail ? 'Failed' : 'Not sent yet';
+    return [x.rowObj['Registration ID'], x.rowObj['Full Legal Name'], x.rowObj['Email Address'],
+      x.rowObj['Ticket Quantity'], state, at ? at : (fail || '')];
+  });
+  const order = { 'Failed': 0, 'Not sent yet': 1, 'Sent': 2 };
+  rows.sort(function (a, b) { return order[a[4]] - order[b[4]] || String(a[0]).localeCompare(String(b[0])); });
+
+  const nSent = rows.filter(function (r) { return r[4] === 'Sent'; }).length;
+  const nFail = rows.filter(function (r) { return r[4] === 'Failed'; }).length;
+  let quota = '';
+  try { quota = MailApp.getRemainingDailyQuota(); } catch (err) {}
+
+  tab.getRange(1, 1, 5, 2).setValues([
+    ['Event reminder email', ''],
+    ['Sent', nSent + ' of ' + rows.length],
+    ['Not sent yet', rows.length - nSent - nFail],
+    ['Failed', nFail],
+    ['Emails this account can still send now', quota + '   (checked ' +
+      Utilities.formatDate(new Date(), 'Asia/Manila', 'MMM d, h:mm a') + ')'],
+  ]);
+  tab.getRange(1, 1).setFontSize(13).setFontWeight('bold');
+  tab.getRange(2, 1, 4, 1).setFontWeight('bold');
+
+  const head = ['Registration ID', 'Full Legal Name', 'Email Address', 'Tickets', 'Reminder', 'Sent At / Error'];
+  tab.getRange(7, 1, 1, head.length).setValues([head])
+    .setFontWeight('bold').setBackground('#111111').setFontColor('#ffffff');
+  if (rows.length) {
+    tab.getRange(8, 1, rows.length, head.length).setValues(rows);
+    tab.getRange(8, 6, rows.length, 1).setNumberFormat('mmm d, h:mm am/pm');
+    const colors = rows.map(function (r) {
+      const c = r[4] === 'Sent' ? '#d9f2e0' : r[4] === 'Failed' ? '#f8d7da' : '#fff4d6';
+      return [c, c, c, c, c, c];
+    });
+    tab.getRange(8, 1, rows.length, head.length).setBackgrounds(colors);
+  }
+  tab.setFrozenRows(7);
+  tab.autoResizeColumns(1, head.length);
 }
