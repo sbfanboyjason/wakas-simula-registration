@@ -45,11 +45,12 @@ const EVENT_CONFIG = {
     <p><strong>Data Privacy Notice</strong></p>
     <p>By registering, you allow the organizers of ${'SB19 "Wakas at Simula" Trilogy Finale — Block Screening'} to collect and process
     your full legal name, email address, mobile number, ticket quantity, and payment
-    verification details (reference number and screenshot), solely for the purposes of:</p>
+    verification details (reference number and screenshot), and on the event date a photo of your ID, solely for the purposes of:</p>
     <ul>
       <li>Processing and verifying your registration and payment</li>
       <li>Sending you registration status updates, your entry QR code, and event-related announcements</li>
-      <li>Validating your entry at the venue on the event date</li>
+      <li>Validating your entry at the venue on the event date, including a photo of your valid ID taken
+      by the registration team at check-in and stored privately by the organizers</li>
     </ul>
     <p>Your data will not be sold or shared with third parties outside of what is necessary to verify
     payment (e.g. your bank/e-wallet reference) and to coordinate entry with the venue. Data is retained

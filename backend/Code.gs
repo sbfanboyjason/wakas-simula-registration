@@ -276,6 +276,11 @@ function onOpen() {
     .addItem('Build / Refresh Dashboard', 'buildDashboard')
     .addItem('Print Attendee List (Approved)', 'showAttendeeListDialog')
     .addSeparator()
+    .addItem('Set Up Event Check-in (staff PINs)', 'setupCheckin')
+    .addItem('Reset a Check-in PIN', 'resetCheckinPin')
+    .addItem('Create Check-in Test Tickets', 'createCheckinTestTickets')
+    .addItem('Remove Check-in Test Tickets', 'removeCheckinTestTickets')
+    .addSeparator()
     .addItem('Run Backup Now', 'runBackupNow')
     .addToUi();
 }
@@ -358,6 +363,9 @@ function doGet(e) {
  */
 function doPost(e) {
   const action = e.parameter && e.parameter.action;
+  if (action === 'checkin') {
+    return handleCheckin_(e); // event-day scanner, see Checkin.gs
+  }
   if (action === 'correct') {
     return handleCorrection(e);
   }
@@ -619,8 +627,17 @@ function validateRegistration(payload) {
 }
 
 function generateRegistrationId(sheet) {
-  const lastRow = sheet.getLastRow(); // header occupies row 1
-  return 'WAS-' + String(lastRow).padStart(5, '0');
+  // Highest existing WAS- number + 1, never "number of rows": counting rows
+  // hands out a duplicate ID as soon as any row (a test row, a spam row) is
+  // deleted. For a sheet that was never edited this gives the same result.
+  const regIdCol = HEADERS.indexOf('Registration ID');
+  const data = sheet.getDataRange().getValues();
+  let max = Math.max(0, sheet.getLastRow() - 1);
+  for (let i = 1; i < data.length; i++) {
+    const m = String(data[i][regIdCol] || '').match(/^WAS-(\d+)$/i);
+    if (m) max = Math.max(max, Number(m[1]));
+  }
+  return 'WAS-' + String(max + 1).padStart(5, '0');
 }
 
 /**
