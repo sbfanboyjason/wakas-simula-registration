@@ -12,6 +12,10 @@
  *    Send Event Reminder to All    - sends to every Approved registrant
  *    Refresh Reminder Status       - rebuilds the "Reminder Status" tab
  *
+ *  Hands-off: run sendEventRemindersAuto() once (RunReminders.gs). It
+ *  sends what today's limit allows, then re-checks every 15 minutes and
+ *  sends the rest as soon as the limit refreshes, then switches off.
+ *
  *  Gmail limits how many people a script can email per day (about 100
  *  for a free Gmail account). "Send to All" stops when that runs out and
  *  stamps each row it sent in the "Event Reminder Sent" column, so
@@ -236,7 +240,49 @@ function sendEventReminderTest() {
   SpreadsheetApp.getUi().alert('Test copy sent to ' + CONFIG.ORGANIZER_CONTACT_EMAIL + '. No registrant was emailed.');
 }
 
-/** Menu: Send Event Reminder to All. Safe to run again: skips anyone already sent. */
+/**
+ * Sends to everyone approved who hasn't received it yet, as far as the
+ * daily Gmail limit and the 6-minute run limit allow. No pop-ups, so it
+ * can run from a timer. Returns { sent, failed, left, quota }.
+ */
+function reminderSendBatch_() {
+  const info = reminderTargets_();
+  const pending = info.targets.filter(function (x) { return !x.sent; });
+  const quota = MailApp.getRemainingDailyQuota();
+  const canSend = Math.max(0, Math.min(pending.length, quota - REMINDER.QUOTA_RESERVE));
+  const failures = reminderLoadFailures_();
+  const started = Date.now();
+  let sent = 0, failed = 0;
+
+  for (let k = 0; k < pending.length && sent < canSend; k++) {
+    if (Date.now() - started > REMINDER.TIME_LIMIT_MS) break;
+    const x = pending[k];
+    try {
+      reminderSend_(x.rowObj['Email Address'], x.rowObj, false);
+      info.sheet.getRange(x.rowNum, info.sentCol).setValue(new Date());
+      delete failures[x.rowObj['Registration ID']];
+      sent++;
+    } catch (err) {
+      failed++;
+      failures[x.rowObj['Registration ID']] = err.message;
+      console.error('Reminder failed for ' + x.rowObj['Registration ID'] + ': ' + err.message);
+      if (/limit|quota|too many times/i.test(err.message)) break;
+    }
+  }
+  SpreadsheetApp.flush();
+  PropertiesService.getScriptProperties().setProperty('reminderFailures', JSON.stringify(failures));
+  try { refreshReminderStatus_(); } catch (err) { console.error('Reminder Status tab: ' + err.message); }
+
+  // Rows that failed for a reason other than the limit (bad address) are not retried forever.
+  const left = pending.length - sent;
+  try {
+    getOrCreateAuditSheet_().appendRow([new Date(), safeActiveUserEmail_(), CONFIG.SHEET_NAME, '', '', REMINDER.SENT_HEADER, '', '',
+      'Event reminder: sent ' + sent + ', failed ' + failed + ', still to send ' + left + ' (quota was ' + quota + ')']);
+  } catch (err) {}
+  return { sent: sent, failed: failed, left: left, quota: quota };
+}
+
+/** Menu: Send Event Reminder to All. Asks first, then sends one batch. */
 function sendEventReminders() {
   const ui = SpreadsheetApp.getUi();
   const lock = LockService.getScriptLock();
@@ -249,7 +295,6 @@ function sendEventReminders() {
     const pending = info.targets.filter(function (x) { return !x.sent; });
     const quota = MailApp.getRemainingDailyQuota();
     const canSend = Math.max(0, Math.min(pending.length, quota - REMINDER.QUOTA_RESERVE));
-
     if (!pending.length) {
       ui.alert('Everyone approved has already received the reminder (' + info.targets.length + ' registrations).');
       return;
@@ -263,45 +308,79 @@ function sendEventReminders() {
       ui.ButtonSet.YES_NO
     );
     if (ans !== ui.Button.YES || canSend === 0) return;
-
-    const started = Date.now();
-    const failures = reminderLoadFailures_();
-    let sent = 0, failed = 0;
-    for (let k = 0; k < pending.length && sent < canSend; k++) {
-      if (Date.now() - started > REMINDER.TIME_LIMIT_MS) break;
-      const x = pending[k];
-      try {
-        reminderSend_(x.rowObj['Email Address'], x.rowObj, false);
-        info.sheet.getRange(x.rowNum, info.sentCol).setValue(new Date());
-        delete failures[x.rowObj['Registration ID']];
-        sent++;
-      } catch (err) {
-        failed++;
-        failures[x.rowObj['Registration ID']] = err.message;
-        console.error('Reminder failed for ' + x.rowObj['Registration ID'] + ': ' + err.message);
-        if (/limit|quota/i.test(err.message)) break;
-      }
-    }
-    SpreadsheetApp.flush();
-    PropertiesService.getScriptProperties().setProperty('reminderFailures', JSON.stringify(failures));
-    try { refreshReminderStatus_(); } catch (err) { console.error('Reminder Status tab: ' + err.message); }
-
-    try {
-      getOrCreateAuditSheet_().appendRow([new Date(), safeActiveUserEmail_(), CONFIG.SHEET_NAME, '', '', REMINDER.SENT_HEADER, '', '',
-        'Event reminder: sent ' + sent + ', failed ' + failed + ', still to send ' + (pending.length - sent)]);
-    } catch (err) {}
-
-    const left = pending.length - sent;
+    const r = reminderSendBatch_();
     ui.alert(
-      'Sent ' + sent + ' reminder(s).' +
-        (failed ? ' ' + failed + ' failed (see Executions log).' : '') +
-        (left > 0
-          ? '\n\nSee the "Reminder Status" tab for who still needs it.\n' + left + ' still to send. Run "Send Event Reminder to All" again later; it skips everyone already sent.'
+      'Sent ' + r.sent + ' reminder(s).' +
+        (r.failed ? ' ' + r.failed + ' failed (see the Reminder Status tab).' : '') +
+        (r.left > 0
+          ? '\n\nSee the "Reminder Status" tab for who still needs it.\n' + r.left + ' still to send. Run "Send Event Reminder to All" again later; it skips everyone already sent.'
           : '\n\nEveryone approved has the reminder now.')
     );
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Hands-off mode. Sends one batch now, and while anyone is still
+ * waiting it keeps a 15-minute timer running that calls this again;
+ * each run sends as many as Gmail's limit allows at that moment (zero
+ * until the limit refreshes). When everyone has it, the timer removes
+ * itself and a short summary goes to the organizer inbox.
+ */
+function sendEventRemindersAuto() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return; // a run is already in progress
+  let r;
+  try {
+    const before = reminderTargets_().targets.filter(function (x) { return !x.sent; }).length;
+    if (!before) {
+      reminderStopAuto_();
+      return;
+    }
+    r = reminderSendBatch_();
+  } finally {
+    lock.releaseLock();
+  }
+
+  const failures = reminderLoadFailures_();
+  const stillMissing = reminderTargets_().targets.filter(function (x) { return !x.sent; });
+  const onlyBadAddresses = stillMissing.length > 0 && stillMissing.every(function (x) {
+    const m = failures[x.rowObj['Registration ID']];
+    return m && !/limit|quota|too many times/i.test(m);
+  });
+
+  if (stillMissing.length === 0 || onlyBadAddresses) {
+    reminderStopAuto_();
+    try {
+      MailApp.sendEmail({
+        to: CONFIG.ORGANIZER_CONTACT_EMAIL,
+        subject: '[Wakas admin] Event reminder emails finished',
+        body:
+          'The event reminder email has gone out to every approved registrant it could reach.\n\n' +
+          (stillMissing.length
+            ? stillMissing.length + ' could not be delivered (bad address). See the "Reminder Status" tab for who they are.\n'
+            : 'No failures.\n') +
+          '\nThe automatic 15-minute check has switched itself off.',
+        name: CONFIG.SENDER_DISPLAY_NAME,
+      });
+    } catch (err) {}
+  } else {
+    reminderStartAuto_();
+  }
+}
+
+function reminderStartAuto_() {
+  const exists = ScriptApp.getProjectTriggers().some(function (t) {
+    return t.getHandlerFunction() === 'sendEventRemindersAuto';
+  });
+  if (!exists) ScriptApp.newTrigger('sendEventRemindersAuto').timeBased().everyMinutes(15).create();
+}
+
+function reminderStopAuto_() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'sendEventRemindersAuto') ScriptApp.deleteTrigger(t);
+  });
 }
 
 // ============================================================
