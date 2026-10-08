@@ -28,6 +28,7 @@ const REMINDER = {
   SENT_HEADER: 'Event Reminder Sent',
   STATUS_SHEET: 'Reminder Status',
   TRANSFER_DEADLINE: '3:00 PM on Friday, October 9',
+  MAX_TRIES: 5, // a send that keeps failing (e.g. a mistyped address) stops after this many tries
   QUOTA_RESERVE: 2, // leave a couple of sends for urgent one-off emails
   TIME_LIMIT_MS: 4.5 * 60 * 1000, // Apps Script stops runs at 6 minutes
 };
@@ -247,10 +248,10 @@ function sendEventReminderTest() {
  */
 function reminderSendBatch_() {
   const info = reminderTargets_();
-  const pending = info.targets.filter(function (x) { return !x.sent; });
+  const failures = reminderLoadFailures_();
+  const pending = info.targets.filter(function (x) { return !x.sent && !reminderGaveUp_(failures, x); });
   const quota = MailApp.getRemainingDailyQuota();
   const canSend = Math.max(0, Math.min(pending.length, quota - REMINDER.QUOTA_RESERVE));
-  const failures = reminderLoadFailures_();
   const started = Date.now();
   let sent = 0, failed = 0;
 
@@ -263,10 +264,12 @@ function reminderSendBatch_() {
       delete failures[x.rowObj['Registration ID']];
       sent++;
     } catch (err) {
+      const id = x.rowObj['Registration ID'];
+      if (/limit|quota|too many times/i.test(err.message)) break; // not this person's fault; retried after the reset
       failed++;
-      failures[x.rowObj['Registration ID']] = err.message;
-      console.error('Reminder failed for ' + x.rowObj['Registration ID'] + ': ' + err.message);
-      if (/limit|quota|too many times/i.test(err.message)) break;
+      const prev = failures[id] || { tries: 0 };
+      failures[id] = { msg: err.message, tries: (prev.tries || 0) + 1 };
+      console.error('Reminder failed for ' + id + ' (try ' + failures[id].tries + '): ' + err.message);
     }
   }
   SpreadsheetApp.flush();
@@ -346,8 +349,7 @@ function sendEventRemindersAuto() {
   const failures = reminderLoadFailures_();
   const stillMissing = reminderTargets_().targets.filter(function (x) { return !x.sent; });
   const onlyBadAddresses = stillMissing.length > 0 && stillMissing.every(function (x) {
-    const m = failures[x.rowObj['Registration ID']];
-    return m && !/limit|quota|too many times/i.test(m);
+    return reminderGaveUp_(failures, x);
   });
 
   if (stillMissing.length === 0 || onlyBadAddresses) {
@@ -359,7 +361,12 @@ function sendEventRemindersAuto() {
         body:
           'The event reminder email has gone out to every approved registrant it could reach.\n\n' +
           (stillMissing.length
-            ? stillMissing.length + ' could not be delivered (bad address). See the "Reminder Status" tab for who they are.\n'
+            ? stillMissing.length + ' could not be sent after ' + REMINDER.MAX_TRIES + ' tries (usually a mistyped email address):\n' +
+              stillMissing.map(function (x) {
+                const f = failures[x.rowObj['Registration ID']] || {};
+                return '  ' + x.rowObj['Registration ID'] + '  ' + x.rowObj['Full Legal Name'] + '  <' + x.rowObj['Email Address'] + '>  ' + (f.msg || '');
+              }).join('\n') +
+              '\nFix the address in the Registrations tab and run startEventRemindersAuto again to retry them.\n'
             : 'No failures.\n') +
           '\nThe automatic 15-minute check has switched itself off.',
         name: CONFIG.SENDER_DISPLAY_NAME,
@@ -388,11 +395,20 @@ function reminderStopAuto_() {
 // ============================================================
 
 function reminderLoadFailures_() {
+  let f = {};
   try {
-    return JSON.parse(PropertiesService.getScriptProperties().getProperty('reminderFailures') || '{}');
-  } catch (err) {
-    return {};
-  }
+    f = JSON.parse(PropertiesService.getScriptProperties().getProperty('reminderFailures') || '{}');
+  } catch (err) {}
+  Object.keys(f).forEach(function (k) {
+    if (typeof f[k] === 'string') f[k] = { msg: f[k], tries: 1 };
+  });
+  return f;
+}
+
+/** True once a person's send has failed MAX_TRIES times for a reason other than the daily limit. */
+function reminderGaveUp_(failures, x) {
+  const f = failures[x.rowObj['Registration ID']];
+  return !!(f && f.tries >= REMINDER.MAX_TRIES);
 }
 
 /** Menu: Refresh Reminder Status. */
@@ -423,41 +439,44 @@ function refreshReminderStatus_() {
   const rows = info.targets.map(function (x) {
     const at = sentValues[x.rowNum - 1][0];
     const fail = failures[x.rowObj['Registration ID']];
-    const state = at ? 'Sent' : fail ? 'Failed' : 'Not sent yet';
+    const state = at ? 'Sent' : fail ? (fail.tries >= REMINDER.MAX_TRIES ? 'Failed' : 'Retrying') : 'Not sent yet';
+    const detail = at ? at : fail ? fail.msg + ' (try ' + fail.tries + ' of ' + REMINDER.MAX_TRIES + ')' : '';
     return [x.rowObj['Registration ID'], x.rowObj['Full Legal Name'], x.rowObj['Email Address'],
-      x.rowObj['Ticket Quantity'], state, at ? at : (fail || '')];
+      x.rowObj['Ticket Quantity'], state, detail];
   });
-  const order = { 'Failed': 0, 'Not sent yet': 1, 'Sent': 2 };
+  const order = { 'Failed': 0, 'Retrying': 1, 'Not sent yet': 2, 'Sent': 3 };
   rows.sort(function (a, b) { return order[a[4]] - order[b[4]] || String(a[0]).localeCompare(String(b[0])); });
 
   const nSent = rows.filter(function (r) { return r[4] === 'Sent'; }).length;
   const nFail = rows.filter(function (r) { return r[4] === 'Failed'; }).length;
+  const nRetry = rows.filter(function (r) { return r[4] === 'Retrying'; }).length;
   let quota = '';
   try { quota = MailApp.getRemainingDailyQuota(); } catch (err) {}
 
-  tab.getRange(1, 1, 5, 2).setValues([
+  tab.getRange(1, 1, 6, 2).setValues([
     ['Event reminder email', ''],
     ['Sent', nSent + ' of ' + rows.length],
-    ['Not sent yet', rows.length - nSent - nFail],
-    ['Failed', nFail],
+    ['Not sent yet', rows.length - nSent - nFail - nRetry],
+    ['Retrying (failed, tries again every 15 min)', nRetry],
+    ['Failed ' + REMINDER.MAX_TRIES + ' times (check the address)', nFail],
     ['Emails this account can still send now', quota + '   (checked ' +
       Utilities.formatDate(new Date(), 'Asia/Manila', 'MMM d, h:mm a') + ')'],
   ]);
   tab.getRange(1, 1).setFontSize(13).setFontWeight('bold');
-  tab.getRange(2, 1, 4, 1).setFontWeight('bold');
+  tab.getRange(2, 1, 5, 1).setFontWeight('bold');
 
   const head = ['Registration ID', 'Full Legal Name', 'Email Address', 'Tickets', 'Reminder', 'Sent At / Error'];
-  tab.getRange(7, 1, 1, head.length).setValues([head])
+  tab.getRange(8, 1, 1, head.length).setValues([head])
     .setFontWeight('bold').setBackground('#111111').setFontColor('#ffffff');
   if (rows.length) {
-    tab.getRange(8, 1, rows.length, head.length).setValues(rows);
-    tab.getRange(8, 6, rows.length, 1).setNumberFormat('mmm d, h:mm am/pm');
+    tab.getRange(9, 1, rows.length, head.length).setValues(rows);
+    tab.getRange(9, 6, rows.length, 1).setNumberFormat('mmm d, h:mm am/pm');
     const colors = rows.map(function (r) {
-      const c = r[4] === 'Sent' ? '#d9f2e0' : r[4] === 'Failed' ? '#f8d7da' : '#fff4d6';
+      const c = r[4] === 'Sent' ? '#d9f2e0' : r[4] === 'Failed' ? '#f8d7da' : r[4] === 'Retrying' ? '#fde2c4' : '#fff4d6';
       return [c, c, c, c, c, c];
     });
-    tab.getRange(8, 1, rows.length, head.length).setBackgrounds(colors);
+    tab.getRange(9, 1, rows.length, head.length).setBackgrounds(colors);
   }
-  tab.setFrozenRows(7);
+  tab.setFrozenRows(8);
   tab.autoResizeColumns(1, head.length);
 }
